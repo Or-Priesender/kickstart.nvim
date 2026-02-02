@@ -125,7 +125,7 @@ return {
       spec = {
         { '<leader>s', group = '[S]earch' },
         { '<leader>sn', group = '[N]oice' },
-        { '<leader>t', group = '[T]oggle' },
+        { '<leader>t', group = '[T]est' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
         { '<leader>g', group = '[G]it' },
         { '<leader>gd', group = 'Git [D]iff' },
@@ -485,6 +485,25 @@ return {
               format = {
                 singleQuote = true,
               },
+              schemas = {
+                kubernetes = '*.yaml',
+                ['http://json.schemastore.org/kustomization'] = 'kustomization.yaml',
+                ['https://json.schemastore.org/chart.json'] = 'Chart.yaml',
+                ['https://json.schemastore.org/github-workflow.json'] = '.github/workflows/*.yaml',
+              },
+              schemaStore = {
+                enable = true,
+                url = 'https://www.schemastore.org/api/json/catalog.json',
+              },
+            },
+          },
+        },
+        helm_ls = {
+          settings = {
+            ['helm-ls'] = {
+              yamlls = {
+                path = 'yaml-language-server',
+              },
             },
           },
         },
@@ -534,6 +553,7 @@ return {
         'vue-language-server', -- Vue language server (volar) for Vue 2 and Vue 3
         'black', -- Python formatter
         'isort', -- Python import sorter
+        'helm-ls', -- Helm language server
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
