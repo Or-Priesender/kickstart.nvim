@@ -159,6 +159,16 @@ return {
         glob_flag = '--glob',
         glob_separator = '%s%-%-',
         rg_opts = "--column --line-number --no-heading --color=always --smart-case --max-columns=4096 --glob '!*.pb.go' --glob '!*.pb.validate.go'",
+        actions = {
+          ['ctrl-g'] = {
+            fn = function(_, opts)
+              -- Wrap grep_lgrep with a schedule to prevent "i" leaking into the prompt
+              vim.schedule(function()
+                require('fzf-lua.actions').grep_lgrep(_, opts)
+              end)
+            end,
+          },
+        },
       },
       keymap = {
         fzf = {
@@ -483,7 +493,7 @@ return {
           settings = {
             yaml = {
               format = {
-                singleQuote = true,
+                singleQuote = false,
               },
               schemas = {
                 kubernetes = '*.yaml',
@@ -557,19 +567,19 @@ return {
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
+      -- Register our per-server overrides on top of nvim-lspconfig's bundled
+      -- defaults. mason-lspconfig v2 dropped the `handlers` option and starts
+      -- servers automatically via `vim.lsp.enable()`, so configuring through
+      -- `vim.lsp.config()` is what actually merges our `settings` (e.g. the
+      -- yamlls `format.singleQuote`) into the defaults shipped in lsp/<name>.lua.
+      for server_name, server in pairs(servers) do
+        server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
+        vim.lsp.config(server_name, server)
+      end
+
       require('mason-lspconfig').setup {
         ensure_installed = {}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
         automatic_installation = false,
-        handlers = {
-          function(server_name)
-            local server = servers[server_name] or {}
-            -- This handles overriding only values explicitly passed
-            -- by the server configuration above. Useful when disabling
-            -- certain features of an LSP (for example, turning off formatting for ts_ls)
-            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-            require('lspconfig')[server_name].setup(server)
-          end,
-        },
       }
     end,
   },
