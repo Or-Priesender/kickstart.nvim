@@ -31,6 +31,20 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
+-- In Rex (without tmux), ctrl+hjkl at the edge of the Neovim windows moves to the Rex pane.
+if vim.env.REX_SESSION and not vim.env.TMUX then
+  local rex = vim.env.REX_BIN_DIR and (vim.env.REX_BIN_DIR .. '/rex') or 'rex'
+  for key, dir in pairs { h = 'left', j = 'down', k = 'up', l = 'right' } do
+    vim.keymap.set('n', '<C-' .. key .. '>', function()
+      local win = vim.api.nvim_get_current_win()
+      vim.cmd.wincmd(key)
+      if vim.api.nvim_get_current_win() == win then
+        vim.system { rex, 'api', 'call', '-s', vim.env.REX_SESSION, 'session.focus_direction', '{"direction":"' .. dir .. '"}' }
+      end
+    end, { desc = 'Move focus to the ' .. dir .. ' window or Rex pane' })
+  end
+end
+
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
 -- vim.keymap.set("n", "<C-S-h>", "<C-w>H", { desc = "Move window to the left" })
 -- vim.keymap.set("n", "<C-S-l>", "<C-w>L", { desc = "Move window to the right" })

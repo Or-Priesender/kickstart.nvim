@@ -48,6 +48,8 @@ return {
   -- Tmux navigator for seamless navigation between tmux and vim
   {
     'christoomey/vim-tmux-navigator',
+    -- In Rex (without tmux), keymaps.lua handles ctrl+hjkl instead.
+    cond = vim.env.TMUX ~= nil or vim.env.REX_SESSION == nil,
     cmd = {
       'TmuxNavigateLeft',
       'TmuxNavigateDown',
